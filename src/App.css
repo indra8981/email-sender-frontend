@@ -33,3 +33,7 @@
 .ant-btn-primary {
   border-radius: 40px;
 }
+.loading{
+  position: absolute;
+  z-index: 1000000;
+}

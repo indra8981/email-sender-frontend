@@ -1,13 +1,17 @@
 import React, { Component } from "react";
-import { Form, Input, Button, notification, Card, PageHeader } from 'antd';
+import { Form, Input, Button, notification, Card, PageHeader, Spin } from 'antd';
 import axios from 'axios';
+import { LoadingOutlined } from '@ant-design/icons';
 import 'antd/dist/antd.css';
+
 import './App.css';
 
 export default class App extends Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      sending: false,
+    };
   }
 
   validateEmails(rule, value, callback) {
@@ -29,14 +33,7 @@ export default class App extends Component {
 
   render() {
     const { TextArea } = Input;
-    const layout = {
-      labelCol: {
-        span: 8,
-      },
-      wrapperCol: {
-        span: 16,
-      },
-    };
+    const antIcon = <LoadingOutlined style={{ fontSize: 30 }} spin />;
     const tailLayout = {
       wrapperCol: {
         offset: 8,
@@ -44,14 +41,17 @@ export default class App extends Component {
       },
     };
     const onFinish = (values) => {
+      this.setState({ sending: true });
       axios.post("/send-email", values)
         .then((res) => {
+          this.setState({ sending: false });
           notification.success({
             message: 'Success!',
             description:
               'Emails Sent Successfully'
           });
         }).catch((err) => {
+          this.setState({ sending: false });
           notification.error({
             message: 'Error!',
             description:
@@ -64,6 +64,9 @@ export default class App extends Component {
       <div className="page-container">
         <PageHeader className="site-page-header" title="Email Sender App" />
         <div className="email-form">
+          {this.state.sending && (<div className="loading">
+            <Spin indicator={antIcon} tip="Sending Email..." />
+          </div>)}
 
           <Card hoverable>
             <Form
@@ -88,7 +91,7 @@ export default class App extends Component {
                 ]}
                 validateTrigger='onBlur'
               >
-                <TextArea autoSize placeholder="Enter comma seperated email addresses" />
+                <TextArea disabled={this.state.sending} autoSize placeholder="Enter comma seperated email addresses" />
               </Form.Item>
 
               <Form.Item
@@ -96,7 +99,7 @@ export default class App extends Component {
                 name="subject"
                 initialValue=""
               >
-                <Input placeholder="Write your Subject" />
+                <Input disabled={this.state.sending} placeholder="Write your Subject" />
               </Form.Item>
 
               <Form.Item
@@ -109,11 +112,11 @@ export default class App extends Component {
                   }
                 ]}
               >
-                <TextArea placeholder="Enter body of email" />
+                <TextArea disabled={this.state.sending} placeholder="Enter body of email" />
               </Form.Item>
 
               <Form.Item {...tailLayout}>
-                <Button type="primary" htmlType="submit" size="large">
+                <Button disabled={this.state.sending} type="primary" htmlType="submit" size="large">
                   Send Email
                 </Button>
               </Form.Item>
